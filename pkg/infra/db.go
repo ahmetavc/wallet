@@ -1,13 +1,14 @@
 package infra
 
 import (
+	"github.com/ahmetavc/wallet/internal/domain/wallet"
 	"github.com/couchbase/gocb/v2"
 	"time"
 )
 
 type Repository interface {
-	Upsert(key string, value interface{}) error
-	Get(key string) (interface{}, error)
+	Upsert(key string, value *wallet.Wallet) error
+	Get(key string) (*wallet.Wallet, error)
 	Remove(key string) error
 	Close() error
 }
@@ -41,7 +42,7 @@ func NewCouchbaseRepository() *CouchbaseRepository {
 	return &CouchbaseRepository{collection: collection, cluster: cluster}
 }
 
-func (repository *CouchbaseRepository) Upsert(key string, value interface{}) error {
+func (repository *CouchbaseRepository) Upsert(key string, value *wallet.Wallet) error {
 	_, err := repository.collection.Upsert(key, value, &gocb.UpsertOptions{})
 	if err != nil {
 		return err
@@ -50,15 +51,15 @@ func (repository *CouchbaseRepository) Upsert(key string, value interface{}) err
 	return nil
 }
 
-func (repository *CouchbaseRepository) Get(key string) (interface{}, error) {
+func (repository *CouchbaseRepository) Get(key string) (*wallet.Wallet, error) {
 	data, err := repository.collection.Get(key, &gocb.GetOptions{})
 
 	if err != nil {
 		return nil, err
 	}
 
-	var content interface{}
-	if err := data.Content(&content); err != nil {
+	var content *wallet.Wallet
+	if err := data.Content(content); err != nil {
 		panic(err)
 	}
 

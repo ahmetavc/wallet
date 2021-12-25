@@ -1,8 +1,14 @@
 package main
 
-import "github.com/ahmetavc/wallet/pkg/infra"
+import (
+	"github.com/ahmetavc/wallet/internal/application"
+	"github.com/ahmetavc/wallet/pkg/infra"
+)
 
 func main() {
-	_ = infra.NewCouchbaseRepository()
-	infra.SetupRouter()
+	repo := infra.NewCouchbaseRepository()
+
+	service := application.NewService(repo)
+
+	infra.SetupRouter(service)
 }

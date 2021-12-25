@@ -106,7 +106,7 @@ func (router *Router) withdraw(r *gin.Engine) {
 	})
 }
 
-func SetupRouter() {
+func SetupRouter(service ApplicationService) {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
@@ -117,7 +117,12 @@ func SetupRouter() {
 		c.String(http.StatusOK, "pong")
 	})
 
-
+	//add endpoints
+	router := Router{service: service}
+	router.get(r)
+	router.deposit(r)
+	router.create(r)
+	router.withdraw(r)
 
 	srv := &http.Server{
 		Addr:    ":8080",

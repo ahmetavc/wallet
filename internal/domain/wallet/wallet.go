@@ -5,48 +5,52 @@ import (
 	"github.com/google/uuid"
 )
 
-type wallet struct {
-	id string
-	balance float64
+type Wallet struct {
+	Id      string  `json:"Id"`
+	Balance float64 `json:"Balance"`
 }
 
-func NewWallet() (*wallet, error){
+func NewWallet() (*Wallet, error){
 	uuid, err := uuid.NewUUID()
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &wallet{
-		id: uuid.String(),
-		balance: 0,
+	return &Wallet{
+		Id:      uuid.String(),
+		Balance: 0,
 	}, nil
 }
 
-func (w *wallet) GetBalance() float64{
-	return w.balance
+func (w *Wallet) GetBalance() float64{
+	return w.Balance
 }
 
-func (w *wallet) Withdraw(amount float64) error {
+func (w *Wallet) GetId() string{
+	return w.Id
+}
+
+func (w *Wallet) Withdraw(amount float64) error {
 	if amount <= 0{
 		return errors.New("withdrawal amount cannot be zero or negative")
 	}
 
-	if amount > w.balance{
-		return errors.New("not enough balance")
+	if amount > w.Balance {
+		return errors.New("not enough Balance")
 	}
 
-	w.balance -= amount
+	w.Balance -= amount
 
 	return nil
 }
 
-func (w *wallet) Deposit(amount float64) error {
+func (w *Wallet) Deposit(amount float64) error {
 	if amount <= 0{
 		return errors.New("deposit amount cannot be zero or negative")
 	}
 
-	w.balance += amount
+	w.Balance += amount
 
 	return nil
 }
