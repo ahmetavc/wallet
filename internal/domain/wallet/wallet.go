@@ -2,58 +2,63 @@ package wallet
 
 import (
 	"errors"
+	"github.com/ahmetavc/wallet/pkg/infra"
 	"github.com/google/uuid"
 )
 
-type Wallet struct {
-	Id      string  `json:"Id"`
-	Balance float64 `json:"Balance"`
+type wallet struct {
+	id      string
+	balance float64
 }
 
-func NewWallet() (*Wallet, error){
+func NewWallet() (*wallet, error) {
 	uuid, err := uuid.NewUUID()
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &Wallet{
-		Id:      uuid.String(),
-		Balance: 0,
+	return &wallet{
+		id:      uuid.String(),
+		balance: 0,
 	}, nil
 }
 
-func (w *Wallet) GetBalance() float64{
-	return w.Balance
+func NewWalletFromDTO(dto infra.WalletDTO) *wallet {
+	return &wallet{
+		id:      dto.Id,
+		balance: dto.Balance,
+	}
 }
 
-func (w *Wallet) GetId() string{
-	return w.Id
+func (w *wallet) GetBalance() float64 {
+	return w.balance
 }
 
-func (w *Wallet) Withdraw(amount float64) error {
-	if amount <= 0{
+func (w *wallet) GetId() string {
+	return w.id
+}
+
+func (w *wallet) Withdraw(amount float64) error {
+	if amount <= 0 {
 		return errors.New("withdrawal amount cannot be zero or negative")
 	}
 
-	if amount > w.Balance {
-		return errors.New("not enough Balance")
+	if amount > w.balance {
+		return errors.New("not enough balance")
 	}
 
-	w.Balance -= amount
+	w.balance -= amount
 
 	return nil
 }
 
-func (w *Wallet) Deposit(amount float64) error {
-	if amount <= 0{
+func (w *wallet) Deposit(amount float64) error {
+	if amount <= 0 {
 		return errors.New("deposit amount cannot be zero or negative")
 	}
 
-	w.Balance += amount
+	w.balance += amount
 
 	return nil
 }
-
-
-

@@ -19,6 +19,10 @@ type ApplicationService interface {
 	Withdraw(id string, amount float64) error
 }
 
+type RequestBody struct {
+	Amount string `json:"amount"`
+}
+
 type Router struct {
 	service ApplicationService
 }
@@ -53,7 +57,7 @@ func (router *Router) get(r *gin.Engine) {
 
 		c.JSON(200, gin.H{
 			"status":  "posted",
-			"id": balance,
+			"balance": balance,
 		})
 	})
 }
@@ -61,16 +65,21 @@ func (router *Router) get(r *gin.Engine) {
 func (router *Router) deposit(r *gin.Engine) {
 	r.POST("/wallet/:id/deposit", func(c *gin.Context) {
 		id := c.Param("id")
-		amount, err := strconv.ParseFloat(c.PostForm("amount"), 64)
-		if err != nil{
-			fmt.Println(err)
+
+		var body RequestBody
+		if err := c.BindJSON(&body); err != nil {
+			c.String(500, "amount parameter should be string")
+			return
+		}
+
+		amount, err := strconv.ParseFloat(body.Amount, 64)
+
+		if err != nil {
 			c.String(500, "amount should be float64")
 			return
 		}
 
-		err = router.service.Deposit(id, amount)
-
-		if err != nil{
+		if err := router.service.Deposit(id, amount); err != nil {
 			fmt.Println(err)
 			c.String(500, err.Error())
 			return
@@ -85,16 +94,21 @@ func (router *Router) deposit(r *gin.Engine) {
 func (router *Router) withdraw(r *gin.Engine) {
 	r.POST("/wallet/:id/withdraw", func(c *gin.Context) {
 		id := c.Param("id")
-		amount, err := strconv.ParseFloat(c.PostForm("amount"), 64)
-		if err != nil{
-			fmt.Println(err)
+
+		var body RequestBody
+		if err := c.BindJSON(&body); err != nil {
+			c.String(500, "amount parameter should be string")
+			return
+		}
+
+		amount, err := strconv.ParseFloat(body.Amount, 64)
+
+		if err != nil {
 			c.String(500, "amount should be float64")
 			return
 		}
 
-		err = router.service.Withdraw(id, amount)
-
-		if err != nil{
+		if err := router.service.Withdraw(id, amount); err != nil {
 			fmt.Println(err)
 			c.String(500, err.Error())
 			return

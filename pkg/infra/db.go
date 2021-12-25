@@ -1,21 +1,18 @@
 package infra
 
 import (
-	"github.com/ahmetavc/wallet/internal/domain/wallet"
 	"github.com/couchbase/gocb/v2"
 	"time"
 )
 
-type Repository interface {
-	Upsert(key string, value *wallet.Wallet) error
-	Get(key string) (*wallet.Wallet, error)
-	Remove(key string) error
-	Close() error
-}
-
 type CouchbaseRepository struct {
 	collection *gocb.Collection
 	cluster    *gocb.Cluster
+}
+
+type WalletDTO struct {
+	Id      string  `json:"id"`
+	Balance float64 `json:"balance"`
 }
 
 func NewCouchbaseRepository() *CouchbaseRepository {
@@ -30,7 +27,10 @@ func NewCouchbaseRepository() *CouchbaseRepository {
 		panic(err)
 	}
 
-	bucket := cluster.Bucket("wallet")
+	//couchbaseBucketName := os.Getenv("COUCHBASE_BUCKET")
+	couchbaseBucketName := "wallet"
+
+	bucket := cluster.Bucket(couchbaseBucketName)
 
 	err = bucket.WaitUntilReady(5*time.Second, nil)
 	if err != nil {
@@ -42,7 +42,7 @@ func NewCouchbaseRepository() *CouchbaseRepository {
 	return &CouchbaseRepository{collection: collection, cluster: cluster}
 }
 
-func (repository *CouchbaseRepository) Upsert(key string, value *wallet.Wallet) error {
+func (repository *CouchbaseRepository) Upsert(key string, value *WalletDTO) error {
 	_, err := repository.collection.Upsert(key, value, &gocb.UpsertOptions{})
 	if err != nil {
 		return err
@@ -51,15 +51,15 @@ func (repository *CouchbaseRepository) Upsert(key string, value *wallet.Wallet) 
 	return nil
 }
 
-func (repository *CouchbaseRepository) Get(key string) (*wallet.Wallet, error) {
+func (repository *CouchbaseRepository) Get(key string) (WalletDTO, error) {
 	data, err := repository.collection.Get(key, &gocb.GetOptions{})
 
 	if err != nil {
-		return nil, err
+		return WalletDTO{}, err
 	}
 
-	var content *wallet.Wallet
-	if err := data.Content(content); err != nil {
+	var content WalletDTO
+	if err := data.Content(&content); err != nil {
 		panic(err)
 	}
 

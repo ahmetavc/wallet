@@ -5,18 +5,30 @@ import (
 	"github.com/ahmetavc/wallet/pkg/infra"
 )
 
-type service struct {
-	Repo infra.Repository
+type Repository interface {
+	Upsert(key string, value *infra.WalletDTO) error
+	Get(key string) (infra.WalletDTO, error)
+	Remove(key string) error
+	Close() error
 }
 
-func NewService(repository infra.Repository) *service {
+type service struct {
+	Repo Repository
+}
+
+func NewService(repository Repository) *service {
 	return &service{Repo: repository}
 }
 
 func (s *service) Create() (string, error) {
 	w, _ := wallet.NewWallet()
 
-	err := s.Repo.Upsert(w.GetId(), w)
+	dto := &infra.WalletDTO{
+		Id:      w.GetId(),
+		Balance: w.GetBalance(),
+	}
+
+	err := s.Repo.Upsert(dto.Id, dto)
 
 	if err != nil {
 		return "", err
@@ -26,7 +38,9 @@ func (s *service) Create() (string, error) {
 }
 
 func (s *service) Get(id string) (float64, error) {
-	w, err := s.Repo.Get(id)
+	walletDTO, err := s.Repo.Get(id)
+
+	w := wallet.NewWalletFromDTO(walletDTO)
 
 	if err != nil {
 		return float64(0), err
@@ -36,7 +50,9 @@ func (s *service) Get(id string) (float64, error) {
 }
 
 func (s *service) Deposit(id string, amount float64) error {
-	w, err := s.Repo.Get(id)
+	walletDTO, err := s.Repo.Get(id)
+
+	w := wallet.NewWalletFromDTO(walletDTO)
 
 	err = w.Deposit(amount)
 
@@ -44,7 +60,12 @@ func (s *service) Deposit(id string, amount float64) error {
 		return err
 	}
 
-	err = s.Repo.Upsert(id, w)
+	newWalletDTO := &infra.WalletDTO{
+		Id:      w.GetId(),
+		Balance: w.GetBalance(),
+	}
+
+	err = s.Repo.Upsert(id, newWalletDTO)
 
 	if err != nil {
 		return err
@@ -54,7 +75,9 @@ func (s *service) Deposit(id string, amount float64) error {
 }
 
 func (s *service) Withdraw(id string, amount float64) error {
-	w, err := s.Repo.Get(id)
+	walletDTO, err := s.Repo.Get(id)
+
+	w := wallet.NewWalletFromDTO(walletDTO)
 
 	err = w.Withdraw(amount)
 
@@ -62,7 +85,12 @@ func (s *service) Withdraw(id string, amount float64) error {
 		return err
 	}
 
-	err = s.Repo.Upsert(id, w)
+	newWalletDTO := &infra.WalletDTO{
+		Id:      w.GetId(),
+		Balance: w.GetBalance(),
+	}
+
+	err = s.Repo.Upsert(id, newWalletDTO)
 
 	if err != nil {
 		return err
