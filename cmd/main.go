@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/ahmetavc/wallet/pkg/infra"
 
 func main() {
-	fmt.Println("ahmet.avci")
+	infra.SetupRouter()
 }
