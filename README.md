@@ -1,6 +1,9 @@
 # Wallet
 
-Wallet Coding Challange
+Welcome to Wallet Coding Challenge repository.
+
+In order to make this code base clean and maintainable, I followed DDD practices and applied Onion Architecture style. I use dependency inversion principle to make the dependencies more manageable and testable. 
+
 
 ## How To Run
 
@@ -10,9 +13,9 @@ First install dependencies
 
 Secondly, we need a couchbase server
 
-``
-docker run -t --name db1 -p 8091-8096:8091-8096 -p 11210-11211:11210-11211 couchbase/server:enterprise-7.0.0    
-``
+```
+docker run -t --name db -p 8091-8096:8091-8096 -p 11210-11211:11210-11211 couchbase/server:enterprise-7.0.0    
+```
 
 Then configure couchbase
 
@@ -35,6 +38,10 @@ Finally, you can run the server
 
 `` go run cmd/main.go``
 
+You can also run unit tests
+
+``go test ./...``
+
 ## How To Interact
 
 Application runs on localhost:8080 and there are 4 different endpoints; 
@@ -44,26 +51,26 @@ You can view postman documentation in here https://documenter.getpostman.com/vie
 CREATE
 ```
 POST /wallet
-RESPONSE {id: "uuid"}
+RESPONSE {id: "uuid", balance: 0}
 ```
 
 GET WALLET
 ```
 GET /wallet/:id
-RESPONSE {balance:amount}
+RESPONSE {id: "id", balance: 100}
 ```
 
 DEPOSIT
 ```
 POST /wallet/:id/deposit
 REQUEST BODY {"amount": "float64AsString"}
-RESPONSE {status: "200"}
+RESPONSE {id: "id", balance: 100}
 ```
 
 WITHDRAW
 ```
 POST /wallet/:id/withdraw
 REQUEST BODY {"amount": "float64AsString"}
-RESPONSE {status: "200"}
+RESPONSE {id: "id", balance: 100}
 ```
 

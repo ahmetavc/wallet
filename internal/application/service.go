@@ -49,7 +49,7 @@ func (s *service) Get(id string) (float64, error) {
 	return w.GetBalance(), nil
 }
 
-func (s *service) Deposit(id string, amount float64) error {
+func (s *service) Deposit(id string, amount float64) (float64, error) {
 	walletDTO, err := s.Repo.Get(id)
 
 	w := wallet.NewWalletFromDTO(walletDTO)
@@ -57,7 +57,7 @@ func (s *service) Deposit(id string, amount float64) error {
 	err = w.Deposit(amount)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	newWalletDTO := &infra.WalletDTO{
@@ -68,13 +68,13 @@ func (s *service) Deposit(id string, amount float64) error {
 	err = s.Repo.Upsert(id, newWalletDTO)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return newWalletDTO.Balance, nil
 }
 
-func (s *service) Withdraw(id string, amount float64) error {
+func (s *service) Withdraw(id string, amount float64) (float64, error) {
 	walletDTO, err := s.Repo.Get(id)
 
 	w := wallet.NewWalletFromDTO(walletDTO)
@@ -82,7 +82,7 @@ func (s *service) Withdraw(id string, amount float64) error {
 	err = w.Withdraw(amount)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	newWalletDTO := &infra.WalletDTO{
@@ -93,8 +93,8 @@ func (s *service) Withdraw(id string, amount float64) error {
 	err = s.Repo.Upsert(id, newWalletDTO)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return newWalletDTO.Balance, nil
 }

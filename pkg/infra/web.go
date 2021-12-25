@@ -15,8 +15,8 @@ import (
 type ApplicationService interface {
 	Get(id string) (float64, error)
 	Create() (string, error)
-	Deposit(id string, amount float64) error
-	Withdraw(id string, amount float64) error
+	Deposit(id string, amount float64) (float64, error)
+	Withdraw(id string, amount float64) (float64, error)
 }
 
 type RequestBody struct {
@@ -38,8 +38,8 @@ func (router *Router) create(r *gin.Engine) {
 		}
 
 		c.JSON(200, gin.H{
-			"status":  "posted",
 			"id": uuid,
+			"balance": 0,
 		})
 	})
 }
@@ -56,7 +56,7 @@ func (router *Router) get(r *gin.Engine) {
 		}
 
 		c.JSON(200, gin.H{
-			"status":  "posted",
+			"id": id,
 			"balance": balance,
 		})
 	})
@@ -79,14 +79,17 @@ func (router *Router) deposit(r *gin.Engine) {
 			return
 		}
 
-		if err := router.service.Deposit(id, amount); err != nil {
+		balance, err := router.service.Deposit(id, amount)
+
+		if  err != nil {
 			fmt.Println(err)
 			c.String(500, err.Error())
 			return
 		}
 
 		c.JSON(200, gin.H{
-			"status":  "posted",
+			"id": id,
+			"balance":  balance,
 		})
 	})
 }
@@ -108,14 +111,17 @@ func (router *Router) withdraw(r *gin.Engine) {
 			return
 		}
 
-		if err := router.service.Withdraw(id, amount); err != nil {
+		balance, err := router.service.Withdraw(id, amount)
+
+		if err != nil {
 			fmt.Println(err)
 			c.String(500, err.Error())
 			return
 		}
 
 		c.JSON(200, gin.H{
-			"status":  "posted",
+			"id":  id,
+			"balance": balance,
 		})
 	})
 }
